@@ -95,23 +95,5 @@ To improve model performance and avoid noise from irrelevant features, I careful
 - Saved predictions into PostgreSQL via SQLAlchemy ORM.  
 - Added interactive visualizations (bar, pie, choropleth).  
 
----
 
-##  Key Skills Acquired
-- **Machine Learning pipeline**: Preprocessing → Training → Evaluation → Deployment.  
-- **FastAPI**: Building REST APIs + serving HTML forms.  
-- **SQLAlchemy**: ORM for database persistence.  
-- **PostgreSQL**: Database integration with Python apps.  
-- **Data Visualization**: Matplotlib, Seaborn, Plotly.  
-- **Model Deployment**: Serving ML model predictions on the web.  
 
----
-
-##  Reflections
-Before this project, I was **new to both FastAPI and SQLAlchemy**. By following the official documentation and applying concepts directly, I was able to:  
-- Understand API development with FastAPI.  
-- Connect ML models to a real-time web form.  
-- Save and analyze predictions using SQLAlchemy + PostgreSQL.  
-- Build a functional end-to-end ML web application.  
-
-This project not only improved my **Python backend development skills**, but also gave me experience in **deploying machine learning models as web services**, a crucial step towards real-world AI/ML applications.  
