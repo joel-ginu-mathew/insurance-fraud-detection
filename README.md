@@ -23,7 +23,7 @@ sqlalchemy, psycopg2 (PostgreSQL ORM & driver)
 joblib, pickle (model persistence)
 
 Install :
-ip install fastapi uvicorn pandas numpy scikit-learn xgboost seaborn matplotlib plotly sqlalchemy psycopg2 joblib
+pip install fastapi uvicorn pandas numpy scikit-learn xgboost seaborn matplotlib plotly sqlalchemy psycopg2 joblib
 
 DATA PREPROCESSING (prepros.py)
   Loads insurance_claims.csv
