@@ -1,0 +1,117 @@
+#  Learning & Implementation Notes – Insurance Fraud Detection Project
+
+This document summarizes the skills, concepts, and tools I learned and implemented during the development of my **Insurance Fraud Detection System** project.  
+
+---
+
+##  What I Learned
+
+### 1. **FastAPI** (from https://fastapi.tiangolo.com/learn/)
+- Learned how to build APIs using **FastAPI**, a modern Python framework.  
+- Understood **path operations** (`@app.get`, `@app.post`) and how to handle **form submissions** with `Form()`.  
+- Created **HTMLResponse endpoints** to serve forms, dashboards, and results.  
+- Learned to integrate FastAPI with **Pydantic models** for request validation.  
+- Implemented **frontend forms** that connect directly to ML model predictions.  
+
+### 2. **SQLAlchemy** (from https://www.sqlalchemy.org/)
+- Learned **database ORM concepts**: tables, sessions, queries.  
+- Defined database models using `declarative_base()` and `Column` mappings.  
+- Created a PostgreSQL connection using `create_engine()`.  
+- Implemented automatic table creation with `Base.metadata.create_all()`.  
+- Stored user inputs + predictions in PostgreSQL for record-keeping and analysis.  
+
+---
+
+##  What I Implemented
+
+###  Data Preprocessing (`prepros.py`)
+- Used **Pandas** for data cleaning (removed missing values, dropped irrelevant columns).  
+- Applied **Label Encoding** for categorical features.  
+- Performed **EDA** with Seaborn and Matplotlib (countplots, heatmaps).  
+- Exported cleaned dataset (`processed_test.csv`) for training.  
+
+###  Feature Selection
+To improve model performance and avoid noise from irrelevant features, I carefully selected a subset of features from the insurance claims dataset.  
+
+**Final feature set used for training:**
+- months_as_customer  
+- policy_deductable  
+- policy_annual_premium  
+- insured_sex  
+- insured_education_level  
+- insured_occupation  
+- insured_hobbies  
+- capital_gains  
+- capital_loss  
+- incident_type  
+- collision_type  
+- incident_severity  
+- authorities_contacted  
+- incident_hour_of_the_day  
+- number_of_vehicles_involved  
+- property_damage  
+- bodily_injuries  
+- witnesses  
+- police_report_available  
+- total_claim_amount  
+- injury_claim  
+- property_claim  
+- auto_model  
+- auto_year  
+
+ This reduced irrelevant/noisy features and led to higher recall (0.70).  
+
+###  Model Training (`model.py`)
+- Explored multiple ML algorithms: RandomForest, KNN, SVC, XGBoost.  
+- Compared **cross-validation scores** for model selection.  
+- Finalized **XGBoostClassifier** with tuned hyperparameters.  
+- Evaluated model using accuracy, precision, recall, F1-score, confusion matrix.  
+- Saved trained model (`model.pkl`) with Joblib.  
+
+#### Cross-Validation Results (10-fold CV)
+| Model                  | Mean Accuracy |
+|-------------------------|---------------|
+| RandomForest            | ~0.74         |
+| K-Nearest Neighbors     | ~0.66         |
+| Support Vector Classifier | ~0.73       |
+| **XGBoost**             | ~0.80–0.82    |
+
+ **XGBoost clearly outperformed others** with best accuracy & recall.  
+
+#### Recall Improvement Experiments
+- Model 1: `n_estimators=100, learning_rate=0.15, max_depth=4` → Recall **0.58**  
+- Model 2: `n_estimators=200, learning_rate=0.20, max_depth=4` → Recall **0.70**  
+- Model 3: `n_estimators=250, learning_rate=0.25, max_depth=4` → Recall **0.70**  
+
+ Increasing trees boosted recall from **0.58 → 0.70**. Beyond 200, recall plateaued.  
+**Final model chosen:** `XGBClassifier(n_estimators=250, learning_rate=0.25, max_depth=4)` with recall **0.70**.  
+
+###  Web Application (`app.py`)
+- Built a **FastAPI web app** with:  
+  - `/` → Homepage  
+  - `/predict` → Fraud prediction form (GET & POST)  
+  - `/dashboard` → Interactive dashboard with Plotly  
+- Encoded user inputs with **LabelEncoder**.  
+- Saved predictions into PostgreSQL via SQLAlchemy ORM.  
+- Added interactive visualizations (bar, pie, choropleth).  
+
+---
+
+##  Key Skills Acquired
+- **Machine Learning pipeline**: Preprocessing → Training → Evaluation → Deployment.  
+- **FastAPI**: Building REST APIs + serving HTML forms.  
+- **SQLAlchemy**: ORM for database persistence.  
+- **PostgreSQL**: Database integration with Python apps.  
+- **Data Visualization**: Matplotlib, Seaborn, Plotly.  
+- **Model Deployment**: Serving ML model predictions on the web.  
+
+---
+
+##  Reflections
+Before this project, I was **new to both FastAPI and SQLAlchemy**. By following the official documentation and applying concepts directly, I was able to:  
+- Understand API development with FastAPI.  
+- Connect ML models to a real-time web form.  
+- Save and analyze predictions using SQLAlchemy + PostgreSQL.  
+- Build a functional end-to-end ML web application.  
+
+This project not only improved my **Python backend development skills**, but also gave me experience in **deploying machine learning models as web services**, a crucial step towards real-world AI/ML applications.  
