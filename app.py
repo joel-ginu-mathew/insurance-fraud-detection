@@ -10,12 +10,65 @@ from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import plotly.express as px
-
+import shap
+import numpy as np
+from openai import OpenAI
+import google.generativeai as genai
+import os
+import uuid
 
 # Load the model and label encoder
 model_path = "D:\python\insurance fraud\model.pkl"
 with open("model.pkl", "rb") as f:
     model = pickle.load(f)
+
+
+# Initialize OpenAI client
+os.environ["GOOGLE_API_KEY"] = "AIzaSyAXZEFOMDHC1cuW7V7UnbrkX8xpAMww4_Y"  
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+
+def generate_explanation(model, input_df, prediction_label):
+    """
+    Generates a human-readable explanation of the model's reasoning
+    using SHAP + Gemini 2.5 Flash (free API).
+    """
+    import shap, numpy as np
+
+    try:
+        # Compute SHAP values
+        explainer = shap.Explainer(model)
+        shap_values = explainer(input_df)
+        shap_contrib = shap_values.values[0]
+
+        # Top 5 contributing features
+        top_indices = np.argsort(np.abs(shap_contrib))[::-1][:5]
+        top_features = [(input_df.columns[i], shap_contrib[i]) for i in top_indices]
+        summary = "\n".join([f"{feat}: {impact:.2f}" for feat, impact in top_features])
+
+        # Prepare a clear prompt for Gemini
+        prompt = f"""
+        The insurance fraud detection model predicted: '{prediction_label}'.
+        The following input features had the strongest influence on the decision:
+
+        {summary}
+
+        Explain this reasoning clearly in simple, transparent lanugage also make it under 200 words,
+        make the explaination in two paragraphs, 
+        first explaining the shap values and the reason for the outcome,
+        second paragraph explains how the model could bring a better outcome what changes could be made.
+        """
+
+        # Use Gemini to generate explanation
+        model_gen = genai.GenerativeModel("gemini-2.5-flash")
+        response = model_gen.generate_content(prompt)
+
+        # Return Gemini’s explanation text
+        return response.text.strip()
+
+    except Exception as e:
+        return f"Explanation unavailable due to: {e}"
+
 
 le_path = "D:\python\insurance fraud\label_encoder_ins.pkl"
 with open("label_encoder_ins.pkl", "rb") as f:
@@ -493,6 +546,17 @@ async def post_predict(
     pred = model.predict(input_df)[0]
     pred_str = "Possible Fraud" if pred == 1 else "Legitimate"
 
+        # Get fraud probability
+    if hasattr(model, "predict_proba"):
+      fraud_prob = model.predict_proba(input_df)[0][1] * 100  # percentage
+    else:
+      fraud_prob = None
+
+
+
+    # Generate explainability output
+    explanation = generate_explanation(model, input_df, pred_str)
+
     # Save user data + prediction to DB
     db = SessionLocal()
     db_claim = Claim(
@@ -532,6 +596,11 @@ async def post_predict(
     <body>
         <h2>Prediction Result</h2>
         <p><b>Prediction:</b> {pred_str}</p>
+        <p><b>Fraud Probability:</b> {fraud_prob:.2f}%</p>
+        <h3>Model Explainability (GEMINI AI)</h3>
+        <div style='background:#f0f0f0;padding:15px;border-radius:10px;width:60%;'>
+         {explanation}
+        </div>
         <p><a href="/predict">Back</a></p>
         <p><a href="/">Home</a></p>
     </body>
