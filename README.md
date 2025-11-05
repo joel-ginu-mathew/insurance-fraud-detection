@@ -4,7 +4,7 @@ PROJECT STRUCTURE
 
 ├── prepros.py # Data preprocessing & encoding 
 ├── modelex.py # Model training, evaluation & saving 
-├── app.py # FastAPI app: prediction form + dashboard + DB 
+├── main.py # FastAPI app: prediction form + dashboard + DB 
 ├── insurance_claims.csv # Raw dataset 
 ├── processed_test.csv # Cleaned dataset 
 ├── model.pkl # Trained ML model (XGBoost) 
@@ -39,7 +39,7 @@ MODEL TRAINING (model.py)
   Saves trained model as model.pkl
   Exports test set for later predictions (test.csv)
 
-WEB APPLICATION (app.py)
+WEB APPLICATION (main.py)
 
 FastAPI endpoints:
 
@@ -64,10 +64,10 @@ RUNNING THE App
 python prepros.py
 
 2. Train and save model
-python modelex.py
+python model.py
 
 3. Start FastAPI app
-uvicorn app:app --reload
+uvicorn main:app --reload
 
 
 Now open:
@@ -75,3 +75,38 @@ Now open:
 http://127.0.0.1:8000/ → Homepage
 http://127.0.0.1:8000/predict → Fraud prediction form
 http://127.0.0.1:8000/dashboard → Interactive dashboard
+
+DOCKER Containerization
+ 
+ Build the Docker Image
+
+1.Make sure Dockerfile is in the project root, then run:
+bash: docker build -t insurance-fraud-app .
+
+2.Run the Container
+bash:docker run -d -p 8000:8000 insurance-fraud-app
+
+App will be available at:
+http://localhost:8000
+
+DOCKER COMPOSE (App + PostgreSQL)
+
+If you’re using the provided docker-compose.yml, it sets up:
+
+  A FastAPI container
+
+  A PostgreSQL container
+
+  A network bridge for database access
+
+Run both services: docker-compose up --build
+
+This will:
+
+  Start PostgreSQL on port 5432
+
+  Start FastAPI app on port 8000
+
+  Automatically create the insurance database
+
+
