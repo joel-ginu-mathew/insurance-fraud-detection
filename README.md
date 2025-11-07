@@ -99,7 +99,8 @@ If you’re using the provided docker-compose.yml, it sets up:
 
   A network bridge for database access
 
-Run both services: docker-compose up --build
+Run both services: 
+bash :docker-compose up --build
 
 This will:
 
