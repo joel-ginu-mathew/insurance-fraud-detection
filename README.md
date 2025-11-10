@@ -66,7 +66,9 @@ python prepros.py
 2. Train and save model
 python model.py
 
-3. Start FastAPI app
+3. Create a gemini API and the code to main.py
+   
+4. Start FastAPI app
 uvicorn main:app --reload
 
 
